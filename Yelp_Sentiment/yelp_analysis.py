@@ -1,7 +1,11 @@
 import json
+from heapq import nlargest
+from collections import Counter
+import re
+
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
-# Function to load the Yelp dataset from a JSON file
+# Function to load Yelp dataset 
 def load_dataset(file_path):
     dataset = []
     with open(file_path, 'r', encoding='utf-8') as file:
@@ -10,7 +14,7 @@ def load_dataset(file_path):
             dataset.append(data)
     return dataset
 
-# Function to search for businesses by name and zip code
+# Function to search for businesses (name and zip code)
 def search_businesses(dataset, name, zip_code):
     businesses_found = []
     for item in dataset:
@@ -18,9 +22,35 @@ def search_businesses(dataset, name, zip_code):
             businesses_found.append(item)
     return businesses_found
 
-# Function to search for reviews by business ID
+# Function to search for reviews (business ID)
 def search_reviews_by_business_id(reviews, business_id):
     return [review for review in reviews if review['business_id'] == business_id]
+
+# Function to generate a summary of reviews (extractive summarization)
+def generate_review_summary(reviews):
+    # Sorted for 50 most recent reviews
+    recent_reviews = sorted(reviews, key=lambda x: x['date'], reverse=True)[:50]
+    
+    all_text = ' '.join(review['text'] for review in recent_reviews)
+    sentences = re.split(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', all_text)  # Split text into sentences
+
+    # Calculate word frequency for each sentence
+    word_frequency = Counter(re.findall(r'\w+', all_text.lower()))
+
+    # Assign a score to each sentence
+    sentence_scores = {}
+    for sentence in sentences:
+        for word in re.findall(r'\w+', sentence.lower()):
+            if word in word_frequency:
+                if len(sentence.split()) < 50:  # Consider only sentences with less than 50 words
+                    if sentence not in sentence_scores:
+                        sentence_scores[sentence] = word_frequency[word]
+                    else:
+                        sentence_scores[sentence] += word_frequency[word]
+
+    # Select top 5 sentences 
+    summary_sentences = nlargest(5, sentence_scores, key=sentence_scores.get)
+    return ' '.join(summary_sentences)
 
 # Function to analyze the sentiment of reviews and determine the overall rating
 def analyze_sentiment(reviews):
@@ -39,7 +69,7 @@ def analyze_sentiment(reviews):
         rating = "Very Good"
     return rating
 
-# Function to display detailed information about a selected business
+# Function to display business info
 def display_business_details(business, reviews):
     business_id = business['business_id']
     name = business['name']
@@ -53,6 +83,15 @@ def display_business_details(business, reviews):
 
     # Analyze sentiment of reviews
     rating = analyze_sentiment(business_reviews)
+    
+    # Count the number of reviews in each sentiment category
+    sentiment_counts = Counter()
+    for review in business_reviews:
+        sentiment = analyze_sentiment([review])
+        sentiment_counts[sentiment] += 1
+
+    # Generate summary of reviews
+    summary = generate_review_summary(business_reviews)
 
     # Display business details
     print("\nBusiness Details:")
@@ -65,17 +104,18 @@ def display_business_details(business, reviews):
             print(f"  {day}: {timings}")
     if categories:
         print("Categories:", ', '.join(categories))
-    print(f"Rating: {rating}")
-    print("Reviews:")
-    for idx, review in enumerate(business_reviews[:3]):  # Display only the first 3 reviews
-        print(f"Review {idx + 1}: {review['text']}")
+    print(f"Overall Rating: {rating}")
+    print("Rating Breakdown:")
+    for sentiment, count in sentiment_counts.items():
+        print(f"{sentiment}: {count} review(s)")
+    print("Summary of Reviews:")
+    print(summary)
 
-# Function to display the main menu options
+# Function for main menu options
 def main_menu():
     print("\n1. Search for a Business")
     print("2. Exit")
 
-# Main function to run the application
 def main():
     # Paths to the Yelp dataset files
     businesses_file = 'yelp_academic_dataset_business.json'
@@ -87,13 +127,14 @@ def main():
 
     while True:
         main_menu()  # Display the main menu
-        choice = input("Enter your choice: ")  # Prompt the user for choice
+        choice = input("Enter your choice: ")  # Prompt the user
 
-        if choice == '1':  # If the user chooses to search for a business
+
+        if choice == '1':  
             business_name = input("Enter the name of the business: ")
             zip_code = input("Enter the zip code: ")
 
-            # Search for businesses with the specified name and zip code
+            # Search for businesses
             businesses = search_businesses(businesses_data, business_name, zip_code)
 
             if not businesses:
@@ -112,17 +153,17 @@ def main():
                 selected_idx = int(selected_idx)
                 if 1 <= selected_idx <= len(businesses):
                     selected_business = businesses[selected_idx - 1]
-                    display_business_details(selected_business, reviews_data)  # Display details of the selected business
+                    display_business_details(selected_business, reviews_data) 
                 else:
                     print("Invalid selection. Please enter a valid number.")
             except ValueError:
                 print("Invalid input. Please enter a number.")
         
-        elif choice == '2':  # If the user chooses to exit
+        elif choice == '2':  # Exit
             print("Exiting the application...")
             break
 
-        else:  # If the user enters an invalid choice
+        else:  # Invalid Entry
             print("Invalid choice. Please enter a valid option.")
 
 if __name__ == "__main__":
