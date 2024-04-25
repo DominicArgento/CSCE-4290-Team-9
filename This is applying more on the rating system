@@ -1,0 +1,42 @@
+import pandas as pd
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+
+# 'yelp_restraunt_reviews' DataFrame
+# 'review_star' column#
+
+# Point of view from the reviewers
+#VADER
+def analyze_sentiment(text):
+    analyzer = SentimentIntensityAnalyzer()
+    overall_scores = analyzer.polarity_scores(text)['compound']
+    if overall_scores >= 0.05:
+        return 'positive'
+    elif overall_scores <= -0.05:
+        return 'negative'
+    else:
+        return 'neutral'
+
+# Analyzing the reviwers comments on buisnesses 
+yelp_restraunt_reviews['sentiment'] = yelp_restraunt_reviews['review_text'].apply(analyze_sentiment)
+
+# Plotting an actual visualization of the yelp reviews
+import matplotlib.pyplot as plt
+
+
+#review_date_tag = container.find('span', class_='review-date')
+ #       review_date = review_date_tag.text if review_date_tag else #"Date not found"
+ #       reviewer_name_tag = container.find('span', class_='display-#name-link')
+        #reviewer_name = reviewer_name_tag.text if reviewer_name_tag #else "Reviewer name not found"
+#         print(f"Reviewer Name: {reviewer_name}")
+
+
+
+
+
+
+sentiment_counts = yelp_restraunt_reviews['sentiment'].value_counts()
+plt.bar(sentiment_counts.index, sentiment_counts.values)
+plt.title('Distribution of Review Sentiments')
+plt.xlabel('Sentiment')
+plt.ylabel('Number of Reviews')
+plt.show()
