@@ -1,0 +1,69 @@
+#this will be the psuedo code for the yelp reviews
+Import required libraries
+
+Function load_dataset(file_path):
+    dataset = []
+    Open file at file_path
+    For each line in file:
+    JSON parse line for the dataset
+    Close the file
+    Return the dataset
+
+#this will be the name,dataset, and zip code
+Search_businesses(information about buisness):
+    businesses_found = []
+    For each item in dataset:
+        If buisnesses name is found in item name (case-insensitive) and zip code matches provided zip_code:
+            Append item to businesses_found
+    Return businesses_found
+
+Have a Function search_reviews_by_business_id(reviews, business_id):
+    Return reviews where business_id matches provided business_id
+
+Have a Function analyze_sentiment(reviews):
+    retrieve sentiment analyzer
+    
+    Calculate average customer or reviewres score based on rating
+    If average score < -0.6:
+        Set rating as "Very Bad"
+    Else if average score < -0.2:
+        Set rating as "Bad"
+    Else if average score < 0.2:
+        Set rating as "Okay"
+    Else if average score < 0.6:
+        Set rating as "Good"
+    Else:
+        Set rating as "Very Good"
+    Return rating
+
+have a function display_business_details(business, reviews):
+    retrieve business details
+    retrieve business ID
+    Analyze reviews from the customer 
+    Display business details and reviews
+
+Function main_menu():
+    Display main menu options
+
+Function main():
+    Load Yelp dataset
+    if its true True:
+    Display main menu
+        If choice is 1:
+            Ask user for business name and zip code
+            Search for businesses
+            If correct businesses is found:
+                Display found businesses
+                Followed by user selecting a business
+                If user selects a business:
+                    Display details of selected business
+            Else:
+                No businesses were found
+        Else if choice is 2:
+            exiting application
+            Break from the current loop
+        Else:
+            Invalid choice
+
+If script is executed directly:
+    Call main function
