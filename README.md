@@ -2,7 +2,7 @@
 
 Team 9 Project for Natural Language Processing
 
-**This application takes 30-40 seconds to a few minutes to initialize because of the data size**
+**This application takes between 30 seconds to a few minutes to initialize because of the data size**
 
 This is a project aimed at helping understand the overall sentiment of a certain business within Yelp's dataset. The application asks the user for a business name and then prompts for its corresponding zip code. It then analyzes reviews and provides business information, as well as overall sentiment based on that score (a breakdown is provided) and a summary of the previous 50 reviews (this is based on word frequency and sentence score).
 
